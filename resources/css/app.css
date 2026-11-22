@@ -1,9 +1,74 @@
 @import 'tailwindcss';
 
+@plugin '@tailwindcss/forms';
+
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
+@source '../../modules/**/*.blade.php';
 
+/*
+ * NAPPS brand tokens. Placeholder palette (association green + gold) until
+ * the secretariat supplies official brand colours; change values here only.
+ */
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    --color-brand-50: #eefaf3;
+    --color-brand-100: #d6f2e0;
+    --color-brand-200: #b0e4c6;
+    --color-brand-300: #7dcfa4;
+    --color-brand-400: #48b37d;
+    --color-brand-500: #259761;
+    --color-brand-600: #17794d;
+    --color-brand-700: #13613f;
+    --color-brand-800: #124d34;
+    --color-brand-900: #0f3f2b;
+    --color-brand-950: #072318;
+
+    --color-accent-100: #fdf1d3;
+    --color-accent-300: #f7cf6b;
+    --color-accent-400: #f2b632;
+    --color-accent-500: #e09b12;
+    --color-accent-600: #b9770c;
+
+    --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply bg-stone-50 text-stone-900 antialiased;
+    }
+
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-brand-600;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@utility tabular {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Bottom bar sits above the iOS/Android gesture area. */
+@utility pb-safe {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
