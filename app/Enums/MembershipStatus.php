@@ -24,6 +24,21 @@ enum MembershipStatus: string
     }
 
     /**
+     * Statuses of approved members (everything except a pending application).
+     *
+     * @return list<self>
+     */
+    public static function members(): array
+    {
+        return [self::Active, self::Owing, self::Suspended];
+    }
+
+    public function isMember(): bool
+    {
+        return $this !== self::Pending;
+    }
+
+    /**
      * Badge tone used by <x-ui.badge>.
      */
     public function tone(): string

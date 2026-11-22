@@ -8,8 +8,9 @@ parameters:
         - modules
         - database/seeders
     tmpDir: storage/framework/cache/phpstan
-    ignoreErrors:
-        # Kernel traits (e.g. BelongsToSchool) are written for domain modules
-        # and are analysed once a module model uses them.
-        -
-            identifier: trait.unused
+    # Read casts() so enum and date casts are typed (Laravel 11+ style).
+    parseModelCastsMethod: true
+    # Module tables: list each module's migrations so model columns are known.
+    databaseMigrationsPath:
+        - database/migrations
+        - modules/Membership/database/migrations

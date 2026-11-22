@@ -20,6 +20,12 @@ Horizon, Reverb, Scout, DomPDF, Laravel Excel; Pest, Larastan, Pint.
   `<x-ui.input>`, `<x-ui.stat>`, `<x-ui.modal>`, ...). Layouts in
   `components/layouts/` (`app`, `auth`, `public`).
 - `resources/js/motion.js` - `x-reveal`, `x-count-up`, `x-pop` (GSAP/Anime.js, lazy-loaded).
+- `app/Services/Payments/` - gateway-agnostic online payments (Paystack; a
+  simulated checkout locally). Modules start them with `PaymentService::start()`
+  and record money in a `PaymentConfirmed` listener; never call Paystack directly.
+- `App\Support\Dashboard\DashboardWidgets` - modules add cards to role home
+  dashboards (fed by their own view composers).
+- Money is integer kobo everywhere; `App\Support\Money` formats and parses naira.
 
 ## Access model
 
@@ -59,4 +65,5 @@ or fail.
 ## Plan
 
 Build plan: `~/.cursor/plans/napps_platform_build_dc6ada49.plan.md` (phases 0-8).
-Phase 0 (foundation) is done; next is Phase 1 (Membership & dues).
+Phases 0 (foundation) and 1 (Membership & dues: MEM-1..3) are done; next is
+Phase 2 (Fees & collections + parent portal).

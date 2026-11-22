@@ -48,5 +48,13 @@ and `bootModule()` for policies, listeners and schedules.
 - **Log money, records, roles and moderation** with `LogsActivity` or `activity()`.
 - **No reaching into another module's tables.** Talk through events or small
   contracts in `app/Contracts`. Community never reads fees or student data.
+- **Take online payments through the kernel.** Call
+  `App\Services\Payments\PaymentService::start()` with a `purpose` and listen for
+  `App\Events\PaymentConfirmed` (it fires once, inside a transaction) to record
+  the money. See `Membership\Listeners\RecordOnlineDuesPayment`.
+- **Add dashboard cards, not dashboard code.** Register views with
+  `App\Support\Dashboard\DashboardWidgets` and feed them with a view composer.
+- **Tell Larastan about module tables.** Add `modules/{Name}/database/migrations`
+  to `databaseMigrationsPath` in `phpstan.neon`.
 - **Keep pages light** (PRD: < 500 KB on 3G). Load heavy JS on demand, as
   `resources/js/motion.js` and `connectEcho()` do.
