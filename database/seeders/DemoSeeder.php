@@ -8,13 +8,17 @@ use App\Enums\ScopeLevel;
 use App\Models\Chapter;
 use App\Models\RoleAssignment;
 use App\Models\School;
+use App\Models\State;
 use App\Models\User;
 use App\Support\PhoneNumber;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Modules\Membership\Seeders\MembershipDemoSeeder;
 
 /**
- * Local-only sample data: a few schools and one account per role.
+ * Local-only sample data, centred on two chapters: Kano Chapter (Kano State)
+ * and Katsina North Chapter (Katsina State, around Daura).
+ *
  * Sign in with the phone number (the SMS code is shown on screen locally)
  * or with the password "password".
  */
@@ -22,42 +26,58 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $ikeja = Chapter::query()->where('name', 'Ikeja Chapter')->firstOrFail();
-        $abuja = Chapter::query()->where('name', 'Abuja Chapter')->firstOrFail();
         $kano = Chapter::query()->where('name', 'Kano Chapter')->firstOrFail();
+        $katsina = State::query()->where('code', 'KT')->firstOrFail();
+        $katsinaNorth = Chapter::query()->firstOrCreate(
+            ['state_id' => $katsina->id, 'name' => 'Katsina North Chapter'],
+            ['lga' => 'Daura'],
+        );
 
+        // [name, chapter, status, levels, lga, address, pupils, lat, lng]
         $schools = collect([
-            ['Bright Future Academy', $ikeja, MembershipStatus::Active, ['nursery', 'primary']],
-            ['Royal Crest International School', $ikeja, MembershipStatus::Owing, ['primary', 'secondary']],
-            ['Greenfield Nursery & Primary School', $ikeja, MembershipStatus::Pending, ['nursery', 'primary']],
-            ['Unity College', $abuja, MembershipStatus::Active, ['secondary']],
-            ['Heritage Schools', $abuja, MembershipStatus::Suspended, ['nursery', 'primary', 'secondary']],
-            ['Morning Star Academy', $kano, MembershipStatus::Active, ['primary']],
+            ['Al-Ihsan Model Academy', $kano, MembershipStatus::Active, ['nursery', 'primary'], 'Nassarawa', '12 Zaria Road, Gyadi-Gyadi', 640, 11.9719, 8.5311],
+            ['Kano Capital International School', $kano, MembershipStatus::Active, ['primary', 'secondary'], 'Tarauni', 'Plot 4, Maiduguri Road', 910, 11.9632, 8.5480],
+            ['Tarauni Heritage Academy', $kano, MembershipStatus::Active, ['nursery', 'primary', 'secondary'], 'Tarauni', '7 Hadejia Road, Unguwa Uku', 455, 11.9580, 8.5395],
+            ['Sabon Gari Unity College', $kano, MembershipStatus::Active, ['secondary'], 'Fagge', '23 Enugu Road, Sabon Gari', 380, 12.0110, 8.5300],
+            ['Gwale Excellence Nursery & Primary School', $kano, MembershipStatus::Pending, ['nursery', 'primary'], 'Gwale', '5 Gwale Market Road', 210, 11.9905, 8.4930],
+            ['Daura Model International School', $katsinaNorth, MembershipStatus::Active, ['nursery', 'primary', 'secondary'], 'Daura', 'Emir\'s Palace Road, Daura', 520, 13.0360, 8.3180],
+            ['Mai\'adua Pinnacle Academy', $katsinaNorth, MembershipStatus::Active, ['primary'], 'Mai\'adua', 'Kano Road, Mai\'adua', 260, 13.1890, 8.2140],
+            ['Zango Bright Stars Schools', $katsinaNorth, MembershipStatus::Pending, ['nursery', 'primary'], 'Zango', 'Opposite LGA Secretariat, Zango', 190, 12.9480, 8.5300],
         ])->mapWithKeys(fn ($s) => [$s[0] => School::withoutGlobalScopes()->firstOrCreate(['name' => $s[0]], [
             'chapter_id' => $s[1]->id,
             'membership_status' => $s[2],
             'levels' => $s[3],
-            'pupil_count' => random_int(80, 900),
-            'address' => 'Demo address, '.$s[1]->lga,
+            'lga' => $s[4],
+            'address' => $s[5],
+            'pupil_count' => $s[6],
+            'latitude' => $s[7],
+            'longitude' => $s[8],
+            'registration_number' => 'RC'.(1_200_000 + crc32($s[0]) % 800_000),
+            'ministry_approval_number' => $s[2] === MembershipStatus::Pending ? null : 'MOE/'.($s[1]->is($kano) ? 'KN' : 'KT').'/'.(1000 + crc32($s[0]) % 9000),
+            'phone' => '+23480'.str_pad((string) (crc32($s[0]) % 100_000_000), 8, '0', STR_PAD_LEFT),
         ])]);
 
-        $brightFuture = $schools['Bright Future Academy'];
-        $royalCrest = $schools['Royal Crest International School'];
+        $alIhsan = $schools['Al-Ihsan Model Academy'];
 
         $accounts = [
-            ['+2348000000001', 'Ngozi Okafor', [[Role::NationalExecutive, ScopeLevel::National, null]]],
-            ['+2348000000002', 'Tunde Bakare', [[Role::StateExecutive, ScopeLevel::State, $ikeja->state_id]]],
-            ['+2348000000003', 'Aisha Bello', [[Role::ChapterExecutive, ScopeLevel::Chapter, $ikeja->id]]],
-            ['+2348000000004', 'Emeka Nwosu', [
-                [Role::Proprietor, ScopeLevel::School, $brightFuture->id],
-                [Role::Proprietor, ScopeLevel::School, $royalCrest->id],
-                [Role::ChapterExecutive, ScopeLevel::Chapter, $ikeja->id],
+            ['+2348000000001', 'Hajiya Zainab Abubakar', [[Role::NationalExecutive, ScopeLevel::National, null]]],
+            ['+2348000000002', 'Aminu Sani Bello', [[Role::StateExecutive, ScopeLevel::State, $kano->state_id]]],
+            ['+2348000000003', 'Hadiza Ibrahim', [[Role::ChapterExecutive, ScopeLevel::Chapter, $kano->id]]],
+            ['+2348000000004', 'Alhaji Bashir Lawan', [
+                [Role::Proprietor, ScopeLevel::School, $alIhsan->id],
+                [Role::Proprietor, ScopeLevel::School, $schools['Kano Capital International School']->id],
+                [Role::ChapterExecutive, ScopeLevel::Chapter, $kano->id],
             ]],
-            ['+2348000000005', 'Funke Adeyemi', [[Role::Bursar, ScopeLevel::School, $brightFuture->id]]],
-            ['+2348000000006', 'Ibrahim Musa', [[Role::Staff, ScopeLevel::School, $brightFuture->id]]],
-            ['+2348000000007', 'Chioma Eze', [[Role::Parent, ScopeLevel::Personal, null]]],
+            ['+2348000000005', 'Fatima Yusuf', [[Role::Bursar, ScopeLevel::School, $alIhsan->id]]],
+            ['+2348000000006', 'Ibrahim Musa', [[Role::Staff, ScopeLevel::School, $alIhsan->id]]],
+            ['+2348000000007', 'Aisha Garba', [[Role::Parent, ScopeLevel::Personal, null]]],
             ['+2348000000008', 'Barr. Yusuf Lawal', [[Role::LegalPanel, ScopeLevel::Personal, null]]],
-            ['+2348000000009', 'Kemi Alade', [[Role::Moderator, ScopeLevel::Chapter, $ikeja->id]]],
+            ['+2348000000009', 'Kabiru Abdullahi', [[Role::Moderator, ScopeLevel::Chapter, $kano->id]]],
+            ['+2348000000010', 'Usman Dikko', [[Role::StateExecutive, ScopeLevel::State, $katsina->id]]],
+            ['+2348000000011', 'Maryam Sani', [[Role::ChapterExecutive, ScopeLevel::Chapter, $katsinaNorth->id]]],
+            ['+2348000000012', 'Sadiq Umar', []], // applicant: Gwale Excellence
+            ['+2348000000013', 'Halima Bello', []], // applicant: Zango Bright Stars
+            ['+2348000000014', 'Nasiru Ahmed', [[Role::Proprietor, ScopeLevel::School, $schools['Daura Model International School']->id]]],
         ];
 
         $rows = [];
@@ -73,6 +93,14 @@ class DemoSeeder extends Seeder
                 $assignment = RoleAssignment::grant($user, $role, $level, $scopeId);
                 $rows[] = [PhoneNumber::format($phone), $name, $assignment->label()];
             }
+
+            if ($roles === []) {
+                $rows[] = [PhoneNumber::format($phone), $name, 'Applicant (no role yet)'];
+            }
+        }
+
+        if (class_exists(MembershipDemoSeeder::class)) {
+            $this->call(MembershipDemoSeeder::class);
         }
 
         $this->command?->table(['Phone', 'Name', 'Role'], $rows);
