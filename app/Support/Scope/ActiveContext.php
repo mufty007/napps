@@ -129,6 +129,21 @@ class ActiveContext
     }
 
     /**
+     * Whether the active role sits exactly at this place in the org chain
+     * (e.g. it is the chapter that set a levy, not merely one that can see it).
+     */
+    public function isAt(ScopeLevel $level, ?int $scopeId = null): bool
+    {
+        $assignment = $this->assignment();
+
+        if ($assignment === null || $assignment->scope_type !== $level) {
+            return false;
+        }
+
+        return ! $level->requiresScopeId() || $assignment->scope_id === $scopeId;
+    }
+
+    /**
      * Make the given assignment the active one for this session.
      */
     public function switchTo(RoleAssignment $assignment): void

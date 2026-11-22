@@ -7,30 +7,35 @@ use App\Enums\ScopeLevel;
 use App\Models\Chapter;
 use App\Models\School;
 use App\Models\State;
+use App\Support\Dashboard\DashboardWidgets;
 use App\Support\Scope\ActiveContext;
 use Illuminate\View\View;
 
 /**
- * Each role starts on its own home dashboard (PRD: Key screens). Module
- * phases add their widgets; Phase 0 shows the org data every role has.
+ * Each role starts on its own home dashboard (PRD: Key screens). The kernel
+ * shows the org data every role has; modules add their own cards through
+ * App\Support\Dashboard\DashboardWidgets.
  */
 class DashboardController extends Controller
 {
-    public function __invoke(ActiveContext $context): View
+    public function __invoke(ActiveContext $context, DashboardWidgets $widgets): View
     {
         $role = $context->role();
+        $shell = $role?->shell() ?? 'none';
+        $widgetViews = $widgets->for($shell, $context);
 
         if (! $role) {
-            return view('dashboard.none');
+            return view('dashboard.none', ['widgets' => $widgetViews]);
         }
 
-        return match ($role->shell()) {
-            'secretariat', 'executive' => view('dashboard.executive', $this->orgSummary($context)),
+        return match ($shell) {
+            'secretariat', 'executive' => view('dashboard.executive', [...$this->orgSummary($context), 'widgets' => $widgetViews]),
             'school' => view('dashboard.school', [
                 'school' => School::query()->with(['chapter', 'state'])->find($context->schoolId()),
+                'widgets' => $widgetViews,
             ]),
-            'parent' => view('dashboard.parent'),
-            default => view('dashboard.legal'),
+            'parent' => view('dashboard.parent', ['widgets' => $widgetViews]),
+            default => view('dashboard.legal', ['widgets' => $widgetViews]),
         };
     }
 
@@ -53,7 +58,8 @@ class DashboardController extends Controller
         return [
             'level' => $level,
             'place' => $context->assignment()?->scopeModel(),
-            'schoolCount' => $statusCounts->sum(),
+            // Applicants are not members until approved.
+            'schoolCount' => $statusCounts->except(MembershipStatus::Pending->value)->sum(),
             'statusCounts' => $statusCounts,
             'chapterCount' => match ($level) {
                 ScopeLevel::National => Chapter::query()->count(),

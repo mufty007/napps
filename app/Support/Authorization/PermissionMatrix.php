@@ -34,6 +34,8 @@ final class PermissionMatrix
             'membership.applications.approve' => 'Approve school applications (state)',
             'membership.dues.configure' => 'Set dues and levies',
             'membership.dues.pay' => 'Pay membership dues',
+            'membership.dues.record' => 'Record dues paid offline (cash, transfer, teller)',
+            'membership.schools.suspend' => 'Suspend and reinstate member schools',
 
             // Fees & collections
             'fees.structures.manage' => 'Set fee structures',
@@ -87,14 +89,16 @@ final class PermissionMatrix
         return [
             Role::Secretariat->value => array_keys(self::permissions()),
 
-            Role::NationalExecutive->value => [...$executive, 'templates.publish'],
+            Role::NationalExecutive->value => [...$executive, 'templates.publish', 'membership.schools.suspend'],
 
             Role::StateExecutive->value => [
-                ...$executive, 'membership.applications.approve', 'leases.disputes.resolve',
+                ...$executive, 'membership.applications.approve', 'membership.dues.record', 'membership.schools.suspend',
+                'leases.disputes.resolve',
             ],
 
             Role::ChapterExecutive->value => [
-                ...$executive, 'membership.applications.verify', 'claims.mediate', 'leases.disputes.resolve',
+                ...$executive, 'membership.applications.verify', 'membership.dues.record', 'claims.mediate',
+                'leases.disputes.resolve',
             ],
 
             Role::Proprietor->value => [

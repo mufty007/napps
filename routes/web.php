@@ -6,6 +6,9 @@ use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ContextController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Payments\FakeCheckoutController;
+use App\Http\Controllers\Payments\PaymentCallbackController;
+use App\Http\Controllers\Payments\PaymentWebhookController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,6 +21,17 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::view('/', 'public.home')->name('home');
+
+// Online payments (gateway-agnostic; modules start them via PaymentService).
+Route::get('/payments/callback', PaymentCallbackController::class)->name('payments.callback');
+Route::post('/webhooks/payments', PaymentWebhookController::class)
+    ->middleware('throttle:120,1')
+    ->name('payments.webhook');
+
+if (config('napps.payments.driver') === 'fake' && ! app()->isProduction()) {
+    Route::get('/payments/fake/{reference}', [FakeCheckoutController::class, 'show'])->name('payments.fake.show');
+    Route::post('/payments/fake/{reference}', [FakeCheckoutController::class, 'complete'])->name('payments.fake.complete');
+}
 
 Route::middleware('guest')->group(function () {
     Route::post('/login/otp', [OtpLoginController::class, 'send'])->name('login.otp.send');

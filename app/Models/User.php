@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Enums\ScopeLevel;
 use App\Support\PhoneNumber;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -49,6 +52,28 @@ class User extends Authenticatable
         return $this->roleAssignments()
             ->whereHas('role', fn ($q) => $q->where('name', $role->value))
             ->exists();
+    }
+
+    /**
+     * People who hold a role, optionally at one place in the org chain,
+     * e.g. User::holdingRole(Role::ChapterExecutive, ScopeLevel::Chapter, $chapterId).
+     *
+     * @param  Builder<User>  $query
+     */
+    #[Scope]
+    protected function holdingRole(Builder $query, Role $role, ?ScopeLevel $level = null, ?int $scopeId = null): void
+    {
+        $query->whereHas('roleAssignments', function (Builder $assignments) use ($role, $level, $scopeId) {
+            $assignments->whereHas('role', fn (Builder $q) => $q->where('name', $role->value));
+
+            if ($level !== null) {
+                $assignments->where('scope_type', $level->value);
+            }
+
+            if ($scopeId !== null) {
+                $assignments->where('scope_id', $scopeId);
+            }
+        });
     }
 
     public function hasConfirmedTwoFactor(): bool

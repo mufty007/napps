@@ -4,4 +4,6 @@
     <x-ui.card>
         <x-ui.empty-state icon="scale" :title="__('No cases assigned')" :description="__('When a school sends you a claim file, it appears here with its stage and documents.')" />
     </x-ui.card>
+
+    <x-dashboard.widgets :widgets="$widgets" />
 </x-layouts.app>

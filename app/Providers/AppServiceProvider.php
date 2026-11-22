@@ -2,12 +2,16 @@
 
 namespace App\Providers;
 
+use App\Contracts\PaymentGateway;
 use App\Contracts\SmsGateway;
 use App\Enums\Role;
 use App\Models\User;
 use App\Notifications\Channels\SmsChannel;
+use App\Services\Payments\FakeGateway;
+use App\Services\Payments\PaystackGateway;
 use App\Services\Sms\LogSmsGateway;
 use App\Services\Sms\TermiiSmsGateway;
+use App\Support\Dashboard\DashboardWidgets;
 use App\Support\Navigation\Navigation;
 use App\Support\Navigation\NavItem;
 use App\Support\Scope\ActiveContext;
@@ -19,6 +23,8 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use InvalidArgumentException;
+use RuntimeException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -35,6 +41,23 @@ class AppServiceProvider extends ServiceProvider
                 (string) config('napps.sms.termii.base_url'),
             ),
             default => new LogSmsGateway,
+        });
+
+        $this->app->singleton(DashboardWidgets::class);
+
+        $this->app->singleton(PaymentGateway::class, function ($app) {
+            $driver = config('napps.payments.driver');
+
+            return match ($driver) {
+                'paystack' => new PaystackGateway(
+                    (string) config('napps.payments.paystack.secret_key'),
+                    (string) config('napps.payments.paystack.base_url'),
+                ),
+                'fake' => $app->isProduction()
+                    ? throw new RuntimeException('The fake payment gateway cannot be used in production. Set PAYMENTS_DRIVER=paystack.')
+                    : new FakeGateway($app['cache']->store(), (string) config('app.key')),
+                default => throw new InvalidArgumentException("Unknown payments driver [{$driver}]."),
+            };
         });
     }
 

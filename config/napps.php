@@ -61,6 +61,49 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Online payments
+    |--------------------------------------------------------------------------
+    | driver: "paystack", or "fake" to simulate checkout on this server
+    | (local development only; refused in production).
+    */
+
+    'payments' => [
+        'driver' => env('PAYMENTS_DRIVER', 'paystack'),
+        'currency' => 'NGN',
+        // Paystack needs an email; phone-only members get <phone digits>@this domain.
+        'fallback_email_domain' => env('PAYMENTS_FALLBACK_EMAIL_DOMAIN', 'members.napps.example'),
+        'paystack' => [
+            'public_key' => env('PAYSTACK_PUBLIC_KEY'),
+            'secret_key' => env('PAYSTACK_SECRET_KEY'),
+            'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Membership & dues
+    |--------------------------------------------------------------------------
+    */
+
+    'membership' => [
+        // PRD: the chapter verifies, the state approves. Set false to let the
+        // chapter's verification approve the school directly.
+        'state_approval_required' => (bool) env('MEMBERSHIP_STATE_APPROVAL', true),
+        // Suspend a school automatically once dues are this many days overdue
+        // (null = never; executives can always suspend by hand).
+        'suspend_after_days_overdue' => is_numeric(env('MEMBERSHIP_SUSPEND_AFTER_DAYS')) && (int) env('MEMBERSHIP_SUSPEND_AFTER_DAYS') > 0
+            ? (int) env('MEMBERSHIP_SUSPEND_AFTER_DAYS')
+            : null,
+        // Open applications one person may have at a time (anti-spam).
+        'max_open_applications' => 3,
+        // Upload limit for application documents, in kilobytes.
+        'document_max_kb' => 5120,
+        // Private disk for application documents (never the public disk).
+        'documents_disk' => env('MEMBERSHIP_DOCUMENTS_DISK', 'local'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Secretariat bootstrap account (created by the database seeder)
     |--------------------------------------------------------------------------
     */

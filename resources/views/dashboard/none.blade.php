@@ -1,6 +1,8 @@
 <x-layouts.app :title="__('Welcome')">
     <x-ui.page-header :title="__('Welcome, :name', ['name' => Str::before(auth()->user()->name, ' ')])" :description="__('Your account is ready. Access depends on your role in NAPPS.')" />
 
+    <x-dashboard.widgets :widgets="$widgets" />
+
     <div class="grid gap-4 md:grid-cols-2">
         <x-ui.card x-reveal>
             <div class="flex gap-4">

@@ -18,6 +18,8 @@
         @endif
     </div>
 
+    <x-dashboard.widgets :widgets="$widgets" />
+
     <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <x-ui.card :title="__('Recently added schools')" :padding="$recentSchools->isEmpty()" x-reveal="160">
             @if ($recentSchools->isEmpty())
@@ -38,6 +40,7 @@
         </x-ui.card>
 
         <x-ui.card :title="__('Dues compliance')" x-reveal="200">
+            {{-- Members only: pending applicants are not counted. --}}
             @php $total = max($schoolCount, 1); @endphp
             <div class="flex h-2.5 overflow-hidden rounded-full bg-stone-100" role="img" aria-label="{{ __('Share of schools by membership status') }}">
                 <span class="bg-emerald-500" style="width: {{ $statusCounts['active'] / $total * 100 }}%"></span>
@@ -45,7 +48,7 @@
                 <span class="bg-red-500" style="width: {{ $statusCounts['suspended'] / $total * 100 }}%"></span>
             </div>
             <dl class="mt-5 space-y-3 text-sm">
-                @foreach (\App\Enums\MembershipStatus::cases() as $status)
+                @foreach (array_filter(\App\Enums\MembershipStatus::cases(), fn ($s) => $s !== \App\Enums\MembershipStatus::Pending) as $status)
                     <div class="flex items-center justify-between">
                         <dt><x-ui.badge :tone="$status->tone()" dot>{{ $status->label() }}</x-ui.badge></dt>
                         <dd class="font-semibold text-stone-900 tabular">{{ number_format($statusCounts[$status->value]) }}</dd>

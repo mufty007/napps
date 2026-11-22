@@ -12,6 +12,8 @@
     </x-ui.page-header>
 
     @if ($school)
+        <x-dashboard.widgets :widgets="$widgets" />
+
         <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
             <x-ui.card :title="__('School profile')" x-reveal>
                 <dl class="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2">

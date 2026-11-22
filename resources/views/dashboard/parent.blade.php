@@ -8,4 +8,6 @@
             :description="__('Your child\'s school links them to your phone number when they enrol. Contact the school bursar if you expected to see them here.')"
         />
     </x-ui.card>
+
+    <x-dashboard.widgets :widgets="$widgets" />
 </x-layouts.app>
