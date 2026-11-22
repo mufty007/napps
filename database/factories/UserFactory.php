@@ -12,34 +12,44 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
     protected static ?string $password;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
             'name' => fake()->name(),
+            'phone' => '+234'.fake()->unique()->numerify('80########'),
+            'phone_verified_at' => now(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'two_factor_secret' => null,
+            'two_factor_recovery_codes' => null,
+            'two_factor_confirmed_at' => null,
+            'locale' => 'en',
+            'last_login_at' => null,
             'remember_token' => Str::random(10),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Phone-only account (the common case for parents and proprietors).
      */
-    public function unverified(): static
+    public function phoneOnly(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn () => [
+            'email' => null,
             'email_verified_at' => null,
+            'password' => null,
+        ]);
+    }
+
+    public function withTwoFactor(): static
+    {
+        return $this->state(fn () => [
+            'two_factor_secret' => encrypt('JBSWY3DPEHPK3PXP'),
+            'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1', 'recovery-code-2'])),
+            'two_factor_confirmed_at' => now(),
         ]);
     }
 }

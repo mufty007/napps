@@ -13,7 +13,8 @@ class UpdateUserPassword implements UpdatesUserPasswords
     use PasswordValidationRules;
 
     /**
-     * Validate and update the user's password.
+     * Set or change the user's password. Phone-only accounts have no current
+     * password, so they can set one without it.
      *
      * @param  array<string, string>  $input
      *
@@ -21,10 +22,13 @@ class UpdateUserPassword implements UpdatesUserPasswords
      */
     public function update(User $user, array $input): void
     {
-        Validator::make($input, [
-            'current_password' => ['required', 'string', 'current_password:web'],
-            'password' => $this->passwordRules(),
-        ], [
+        $rules = ['password' => $this->passwordRules()];
+
+        if ($user->hasPassword()) {
+            $rules['current_password'] = ['required', 'string', 'current_password:web'];
+        }
+
+        Validator::make($input, $rules, [
             'current_password.current_password' => __('The provided password does not match your current password.'),
         ])->validateWithBag('updatePassword');
 
