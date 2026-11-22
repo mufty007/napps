@@ -1,0 +1,15 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 5
+    paths:
+        - app
+        - modules
+        - database/seeders
+    tmpDir: storage/framework/cache/phpstan
+    ignoreErrors:
+        # Kernel traits (e.g. BelongsToSchool) are written for domain modules
+        # and are analysed once a module model uses them.
+        -
+            identifier: trait.unused
