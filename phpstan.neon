@@ -14,3 +14,9 @@ parameters:
     databaseMigrationsPath:
         - database/migrations
         - modules/Membership/database/migrations
+        - modules/Fees/database/migrations
+        - modules/Community/database/migrations
+        - modules/Announcements/database/migrations
+        - modules/Claims/database/migrations
+        - modules/Templates/database/migrations
+        - modules/Surveys/database/migrations

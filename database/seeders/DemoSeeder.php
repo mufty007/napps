@@ -13,7 +13,14 @@ use App\Models\User;
 use App\Support\PhoneNumber;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Modules\Announcements\Seeders\AnnouncementsDemoSeeder;
+use Modules\Claims\Seeders\ClaimsDemoSeeder;
+use Modules\Community\Seeders\CommunityDemoSeeder;
+use Modules\Fees\Seeders\FeesDemoSeeder;
+use Modules\Membership\Models\ChapterParent;
 use Modules\Membership\Seeders\MembershipDemoSeeder;
+use Modules\Surveys\Seeders\SurveysDemoSeeder;
+use Modules\Templates\Seeders\TemplatesDemoSeeder;
 
 /**
  * Local-only sample data, centred on two chapters: Kano Chapter (Kano State)
@@ -99,11 +106,45 @@ class DemoSeeder extends Seeder
             }
         }
 
+        // Demo parent linked to Kano chapter (parents are chapter-enrolled, not self-registered).
+        $parent = User::query()->where('phone', '+2348000000007')->first();
+        if ($parent) {
+            ChapterParent::query()->firstOrCreate(
+                ['chapter_id' => $kano->id, 'user_id' => $parent->id],
+                ['added_by' => User::query()->where('phone', '+2348000000003')->value('id')],
+            );
+        }
+
         if (class_exists(MembershipDemoSeeder::class)) {
             $this->call(MembershipDemoSeeder::class);
         }
 
+        if (class_exists(AnnouncementsDemoSeeder::class)) {
+            $this->call(AnnouncementsDemoSeeder::class);
+        }
+
+        if (class_exists(FeesDemoSeeder::class)) {
+            $this->call(FeesDemoSeeder::class);
+        }
+
+        if (class_exists(ClaimsDemoSeeder::class)) {
+            $this->call(ClaimsDemoSeeder::class);
+        }
+
+        if (class_exists(CommunityDemoSeeder::class)) {
+            $this->call(CommunityDemoSeeder::class);
+        }
+
+        if (class_exists(TemplatesDemoSeeder::class)) {
+            $this->call(TemplatesDemoSeeder::class);
+        }
+
+        if (class_exists(SurveysDemoSeeder::class)) {
+            $this->call(SurveysDemoSeeder::class);
+        }
+
         $this->command?->table(['Phone', 'Name', 'Role'], $rows);
         $this->command?->info('Demo accounts: sign in by phone (code shown on screen locally) or password "password".');
+        $this->command?->info('2FA is off locally (TWO_FACTOR_ENFORCE=false). Parents are enrolled by chapter executives.');
     }
 }

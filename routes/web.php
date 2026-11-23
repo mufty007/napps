@@ -6,9 +6,12 @@ use App\Http\Controllers\Auth\OtpLoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\ContextController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Payments\FakeCheckoutController;
 use App\Http\Controllers\Payments\PaymentCallbackController;
 use App\Http\Controllers\Payments\PaymentWebhookController;
+use App\Http\Controllers\PublicHomeController;
+use App\Http\Controllers\StartController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,7 +23,9 @@ use Illuminate\Support\Facades\Route;
 | /forgot-password, /user/* (profile, password, 2FA, confirm-password).
 */
 
-Route::view('/', 'public.home')->name('home');
+Route::get('/', PublicHomeController::class)->name('home');
+Route::view('/join', 'public.join')->name('join');
+Route::view('/join', 'public.join')->name('join');
 
 // Online payments (gateway-agnostic; modules start them via PaymentService).
 Route::get('/payments/callback', PaymentCallbackController::class)->name('payments.callback');
@@ -62,5 +67,11 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('member')->group(function () {
+    Route::get('/home', StartController::class)->name('start');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{id}/open', [NotificationController::class, 'open'])->name('notifications.open');
+    Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+    Route::put('/notifications/preferences', [NotificationController::class, 'updatePreferences'])->name('notifications.preferences');
 });

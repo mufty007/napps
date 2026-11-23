@@ -28,5 +28,15 @@
                 </div>
             </div>
         </x-ui.card>
+
+        <x-ui.card class="md:col-span-2" x-reveal="120">
+            <div class="flex gap-4">
+                <span class="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-stone-100 text-stone-600"><x-ui.icon name="users" /></span>
+                <div>
+                    <h2 class="font-semibold text-stone-900">{{ __('I am a parent') }}</h2>
+                    <p class="mt-1 text-sm text-stone-600">{{ __('Parents are added by their chapter, not through this form. If your chapter already added :phone, sign out and sign back in. Otherwise ask the chapter executive to enrol you.', ['phone' => \App\Support\PhoneNumber::format(auth()->user()->phone)]) }}</p>
+                </div>
+            </div>
+        </x-ui.card>
     </div>
 </x-layouts.app>

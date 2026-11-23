@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Membership\Http\Controllers\ApplicationReviewController;
 use Modules\Membership\Http\Controllers\ApplyController;
+use Modules\Membership\Http\Controllers\ChapterParentController;
 use Modules\Membership\Http\Controllers\DocumentController;
 use Modules\Membership\Http\Controllers\DuesChargeController;
 use Modules\Membership\Http\Controllers\DuesController;
@@ -32,6 +33,13 @@ Route::middleware('member')->prefix('membership')->name('membership.')->group(fu
     // authorizes in the controller, after an SMS link has switched role.
     Route::get('/dues', [DuesController::class, 'index'])->name('dues.index');
     Route::post('/dues/pay', [DuesController::class, 'pay'])->middleware(['can:membership.dues.pay', 'throttle:10,1'])->name('dues.pay');
+
+    // Parents are enrolled by chapter executives only (no public parent signup).
+    Route::middleware('can:parents.manage')->prefix('parents')->name('parents.')->group(function () {
+        Route::get('/', [ChapterParentController::class, 'index'])->name('index');
+        Route::get('/create', [ChapterParentController::class, 'create'])->name('create');
+        Route::post('/', [ChapterParentController::class, 'store'])->middleware('throttle:20,1')->name('store');
+    });
 
     // MEM-2: verification (chapter) and approval (state).
     Route::get('/applications', [ApplicationReviewController::class, 'index'])->name('applications.index');

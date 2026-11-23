@@ -2,8 +2,8 @@
 
 <section {{ $attributes->class('rounded-2xl bg-white shadow-sm ring-1 ring-stone-200/80') }}>
     @if ($title || isset($actions))
-        <header class="flex flex-wrap items-start justify-between gap-3 border-b border-stone-100 px-5 py-4">
-            <div class="min-w-0">
+        <header class="flex items-start justify-between gap-3 border-b border-stone-100 px-5 py-4">
+            <div class="min-w-0 flex-1">
                 @if ($title)
                     <h2 class="text-base font-semibold text-stone-900">{{ $title }}</h2>
                 @endif

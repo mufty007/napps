@@ -90,7 +90,7 @@ it('switches between roles and rescopes queries', function () {
     expect(app(ActiveContext::class)->role())->toBe(Role::ChapterExecutive);
 
     $this->post('/context', ['assignment' => $proprietor->id])
-        ->assertRedirect(route('dashboard'))
+        ->assertRedirect(route('start'))
         ->assertSessionHas(ActiveContext::SESSION_KEY, $proprietor->id);
 
     $this->get('/dashboard')->assertOk()->assertSee($schoolA->name);

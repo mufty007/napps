@@ -18,8 +18,9 @@ use Illuminate\View\View;
 
 /**
  * Sign-up with name + phone, confirmed by SMS code. Email is optional.
- * A new account has no role until a school application is approved or a
- * proprietor/executive invites them.
+ * For proprietors, staff and executives. Parents cannot self-register —
+ * chapter executives enrol them. A new account has no role until a school
+ * application is approved or someone invites them.
  */
 class RegisterController extends Controller
 {
@@ -100,7 +101,7 @@ class RegisterController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('dashboard')->with('status', __('Welcome to :app.', ['app' => config('napps.name')]));
+        return redirect()->route('start')->with('status', __('Welcome to :app.', ['app' => config('napps.name')]));
     }
 
     public function resend(Request $request, OtpService $otp): RedirectResponse

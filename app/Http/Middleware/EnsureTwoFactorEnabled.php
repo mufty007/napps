@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Support\Scope\ActiveContext;
+use App\Support\TwoFactor;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,9 +20,8 @@ class EnsureTwoFactorEnabled
     {
         $user = $request->user();
         $role = $this->context->role();
-        $enforced = config('napps.two_factor.enforce') || app()->isProduction();
 
-        if ($enforced && $user && $role?->requiresTwoFactor() && ! $user->hasConfirmedTwoFactor()) {
+        if (TwoFactor::enforced() && $user && $role?->requiresTwoFactor() && ! $user->hasConfirmedTwoFactor()) {
             if ($request->expectsJson()) {
                 abort(403, __('Two-factor authentication is required for your role.'));
             }

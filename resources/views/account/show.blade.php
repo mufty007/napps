@@ -8,7 +8,7 @@
             </x-ui.alert>
         @endif
 
-        <div class="grid gap-6 lg:grid-cols-2">
+        <div class="grid gap-6 lg:grid-cols-2 lg:items-start">
             {{-- Profile --}}
             <x-ui.card :title="__('Profile')" :description="__('Your phone number is how you sign in.')">
                 <form method="POST" action="{{ route('user-profile-information.update') }}" class="space-y-5">

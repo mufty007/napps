@@ -2,14 +2,17 @@
 
 namespace Modules\Membership\Seeders;
 
+use App\Enums\GatewayStatus;
 use App\Enums\ScopeLevel;
 use App\Models\Chapter;
+use App\Models\GatewayTransaction;
 use App\Models\School;
-use App\Models\State;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Support\Str;
 use Modules\Membership\Enums\ApplicationStatus;
 use Modules\Membership\Enums\DuesKind;
 use Modules\Membership\Enums\PaymentMethod;
@@ -99,12 +102,97 @@ class MembershipDemoSeeder extends Seeder
         $this->pay($ledger, $school('Al-Ihsan Model Academy'), PaymentMethod::Online, '-7 months', paidBy: $bashir, reference: 'NAPPS-DEMO-ONLINE-1');
         $this->pay($ledger, $school('Tarauni Heritage Academy'), PaymentMethod::Cash, '-5 months', recordedBy: $kanoChapter);
         $this->pay($ledger, $school('Daura Model International School'), PaymentMethod::BankTransfer, '-4 months', recordedBy: $katsinaChapter, reference: 'TLR-DAURA-0457', onlyOverdue: true);
+        $this->pay($ledger, $school('Mai\'adua Pinnacle Academy'), PaymentMethod::Online, '-3 months', paidBy: $user('+2348000000014'), reference: 'NAPPS-DEMO-ONLINE-2');
+        $this->pay($ledger, $school('Sabon Gari Unity College'), PaymentMethod::Cash, '-10 months', recordedBy: $kanoChapter);
+
+        // Gateway rows so payment history / reconciliation screens look real.
+        $this->seedGatewayPayments([
+            [$school('Al-Ihsan Model Academy'), $bashir, 'NAPPS-DEMO-ONLINE-1', 2_500_000, '-7 months'],
+            [$school('Kano Capital International School'), $bashir, 'NAPPS-DEMO-ONLINE-KC-1', 500_000, '-2 months'],
+            [$school('Daura Model International School'), $user('+2348000000014'), 'NAPPS-DEMO-ONLINE-DAURA-1', 300_000, '-20 days'],
+        ]);
 
         $compliance->refresh();
 
         $sabonGari = $school('Sabon Gari Unity College');
         if (! $compliance->isSuspended($sabonGari)) {
             $compliance->suspend($sabonGari, $kanoState, 'Dues unpaid since March and no reply to two chapter letters');
+        }
+
+        $this->seedNotifications([
+            $national,
+            $kanoState,
+            $kanoChapter,
+            $bashir,
+            $user('+2348000000005'),
+            $user('+2348000000008'),
+            $user('+2348000000011'),
+        ]);
+    }
+
+    /**
+     * @param  list<array{0: School, 1: User, 2: string, 3: int, 4: string}>  $rows
+     */
+    private function seedGatewayPayments(array $rows): void
+    {
+        foreach ($rows as [$school, $payer, $reference, $amount, $when]) {
+            $paidAt = CarbonImmutable::parse($when);
+            GatewayTransaction::query()->updateOrCreate(
+                ['reference' => $reference],
+                [
+                    'gateway' => 'fake',
+                    'purpose' => 'membership.dues',
+                    'school_id' => $school->id,
+                    'payer_id' => $payer->id,
+                    'amount_kobo' => $amount,
+                    'currency' => 'NGN',
+                    'status' => GatewayStatus::Success,
+                    'channel' => 'card',
+                    'authorization_url' => null,
+                    'metadata' => ['demo' => true, 'school' => $school->name],
+                    'gateway_payload' => ['status' => 'success', 'reference' => $reference],
+                    'paid_at' => $paidAt,
+                    'verified_at' => $paidAt->addMinutes(2),
+                    'created_at' => $paidAt,
+                    'updated_at' => $paidAt,
+                ],
+            );
+        }
+    }
+
+    /** @param  list<User>  $users */
+    private function seedNotifications(array $users): void
+    {
+        $samples = [
+            ['demo.membership.dues', 'Dues payment received', 'A dues payment was recorded for your school.'],
+            ['demo.membership.application', 'Application update', 'A membership application in your chapter needs attention.'],
+            ['demo.claims.assigned', 'Claim assigned', 'A debt claim file was sent to the legal panel.'],
+            ['demo.announcements.event', 'Event reminder', 'Upcoming webinar: Fee collection for chapter schools.'],
+        ];
+
+        foreach ($users as $user) {
+            foreach ($samples as [$type, $title, $body]) {
+                $exists = DatabaseNotification::query()
+                    ->where('notifiable_type', $user->getMorphClass())
+                    ->where('notifiable_id', $user->id)
+                    ->where('type', $type)
+                    ->exists();
+
+                if ($exists) {
+                    continue;
+                }
+
+                DatabaseNotification::query()->create([
+                    'id' => (string) Str::uuid(),
+                    'type' => $type,
+                    'notifiable_type' => $user->getMorphClass(),
+                    'notifiable_id' => $user->id,
+                    'data' => ['title' => $title, 'body' => $body, 'demo' => true],
+                    'read_at' => random_int(0, 1) ? now()->subDays(random_int(1, 5)) : null,
+                    'created_at' => now()->subDays(random_int(0, 10)),
+                    'updated_at' => now(),
+                ]);
+            }
         }
     }
 

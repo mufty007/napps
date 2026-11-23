@@ -10,6 +10,7 @@ return [
 
     'name' => env('NAPPS_NAME', 'NAPPS'),
     'full_name' => env('NAPPS_FULL_NAME', 'National Association of Proprietors of Private Schools'),
+    'motto' => env('NAPPS_MOTTO', 'Nurturing For National Development'),
     'support_whatsapp' => env('NAPPS_SUPPORT_WHATSAPP'),
     'dpo_email' => env('NAPPS_DPO_EMAIL'),
 
@@ -38,7 +39,8 @@ return [
     */
 
     'two_factor' => [
-        'enforce' => (bool) env('TWO_FACTOR_ENFORCE', true),
+        // Production always enforces via middleware; local demo defaults off.
+        'enforce' => (bool) env('TWO_FACTOR_ENFORCE', false),
     ],
 
     /*

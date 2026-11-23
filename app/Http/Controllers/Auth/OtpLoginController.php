@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Rules\NigerianPhone;
 use App\Services\Auth\OtpService;
 use App\Support\PhoneNumber;
+use App\Support\TwoFactor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -64,7 +65,7 @@ class OtpLoginController extends Controller
             throw ValidationException::withMessages(['code' => __('That code is wrong or has expired. Check the SMS or request a new code.')]);
         }
 
-        if ($user->hasConfirmedTwoFactor()) {
+        if (TwoFactor::enforced() && $user->hasConfirmedTwoFactor()) {
             $request->session()->put(['login.id' => $user->getKey(), 'login.remember' => $remember]);
 
             return redirect()->route('two-factor.login');
@@ -73,7 +74,7 @@ class OtpLoginController extends Controller
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route('start'));
     }
 
     public function resend(Request $request, OtpService $otp): RedirectResponse

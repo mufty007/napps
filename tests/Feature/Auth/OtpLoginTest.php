@@ -23,7 +23,7 @@ it('signs a user in with an SMS code', function () {
     $this->get(route('login.otp.verify'))->assertOk()->assertSee('+234 803 *** 4567');
 
     $this->post('/login/otp/verify', ['code' => $code])
-        ->assertRedirect(route('dashboard'));
+        ->assertRedirect(route('start'));
 
     $this->assertAuthenticatedAs($this->user);
     expect($this->user->fresh()->last_login_at)->not->toBeNull();

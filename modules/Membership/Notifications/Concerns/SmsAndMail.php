@@ -3,7 +3,8 @@
 namespace Modules\Membership\Notifications\Concerns;
 
 /**
- * Everyone has a phone; email is optional on NAPPS accounts.
+ * Official membership notices: always in-app and by SMS (PRD: urgent official
+ * notices always reach users by SMS), plus email when the person has one.
  */
 trait SmsAndMail
 {
@@ -12,6 +13,6 @@ trait SmsAndMail
      */
     public function via(object $notifiable): array
     {
-        return filled($notifiable->email ?? null) ? ['sms', 'mail'] : ['sms'];
+        return filled($notifiable->email ?? null) ? ['database', 'sms', 'mail'] : ['database', 'sms'];
     }
 }

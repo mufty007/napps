@@ -6,7 +6,7 @@ it('signs in with phone number and password', function () {
     $user = User::factory()->create(['phone' => '+2348031234567']);
 
     $this->post('/login', ['login' => '0803 123 4567', 'password' => 'password'])
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/home');
 
     $this->assertAuthenticatedAs($user);
 });
@@ -15,7 +15,7 @@ it('signs in with email and password', function () {
     $user = User::factory()->create(['email' => 'bursar@example.com']);
 
     $this->post('/login', ['login' => 'Bursar@Example.com', 'password' => 'password'])
-        ->assertRedirect('/dashboard');
+        ->assertRedirect('/home');
 
     $this->assertAuthenticatedAs($user);
 });

@@ -37,6 +37,14 @@ class DuesIssued extends Notification implements ShouldQueue
             ->action(__('Pay online'), $this->url());
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return ['title' => $this->charge->title, 'body' => $this->message(), 'url' => $this->url(), 'icon' => 'hand-coins'];
+    }
+
     private function message(): string
     {
         return __(':title of :amount for :school is due by :date.', [

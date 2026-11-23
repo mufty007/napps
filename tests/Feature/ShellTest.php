@@ -15,7 +15,11 @@ it('serves the public pages', function (string $uri, string $text) {
 })->with([
     ['/', 'Collect your fees'],
     ['/login', 'Sign in'],
-    ['/register', 'Create your account'],
+    ['/register', 'Create your school account'],
+    ['/join', 'Join your state hub'],
+    ['/news', 'News & updates'],
+    ['/events', 'Events & webinars'],
+    ['/jobs', 'Job board'],
     ['/forgot-password', 'Reset your password'],
 ]);
 
@@ -57,7 +61,7 @@ it('gives members the community tab and keeps parents out', function () {
 
     $this->actingAsRole(Role::Proprietor, $school->id);
     $this->get('/dashboard')->assertSee(route('community.index'));
-    $this->get('/community')->assertOk()->assertSee('Forums');
+    $this->get('/community')->assertOk()->assertSee('Start a post')->assertSee('Forums');
 
     $this->actingAsRole(Role::Parent);
     $this->get('/dashboard')->assertDontSee(route('community.index'));

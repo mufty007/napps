@@ -37,6 +37,19 @@ class ApplicationNeedsReview extends Notification
             ->action(__('Review the application'), $this->url());
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'title' => $this->reviewer === Role::ChapterExecutive ? __('New school to verify') : __('School awaiting state approval'),
+            'body' => $this->line(),
+            'url' => $this->url(),
+            'icon' => 'clipboard-check',
+        ];
+    }
+
     private function line(): string
     {
         $school = $this->application->school;

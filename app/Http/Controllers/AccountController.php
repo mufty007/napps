@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\Scope\ActiveContext;
+use App\Support\TwoFactor;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -19,7 +20,8 @@ class AccountController extends Controller
         return view('account.show', [
             'user' => $user,
             'assignments' => $context->assignments(),
-            'twoFactorRequired' => $context->assignments()->contains(fn ($a) => $a->roleKey()?->requiresTwoFactor()),
+            'twoFactorRequired' => TwoFactor::enforced()
+                && $context->assignments()->contains(fn ($a) => $a->roleKey()?->requiresTwoFactor()),
             'twoFactorPending' => $user->two_factor_secret !== null && $user->two_factor_confirmed_at === null,
         ]);
     }

@@ -7,32 +7,37 @@
 @source '../../modules/**/*.blade.php';
 
 /*
- * NAPPS brand tokens. Placeholder palette (association green + gold) until
- * the secretariat supplies official brand colours; change values here only.
+ * NAPPS brand tokens from the official seal: Nigeria green + gold/amber.
  */
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --color-brand-50: #eefaf3;
-    --color-brand-100: #d6f2e0;
-    --color-brand-200: #b0e4c6;
-    --color-brand-300: #7dcfa4;
-    --color-brand-400: #48b37d;
-    --color-brand-500: #259761;
-    --color-brand-600: #17794d;
-    --color-brand-700: #13613f;
-    --color-brand-800: #124d34;
-    --color-brand-900: #0f3f2b;
-    --color-brand-950: #072318;
+    --color-brand-50: #eef8f2;
+    --color-brand-100: #d5f0e0;
+    --color-brand-200: #ade1c3;
+    --color-brand-300: #78cba0;
+    --color-brand-400: #3fad78;
+    --color-brand-500: #1f915c;
+    --color-brand-600: #008840;
+    --color-brand-700: #006c34;
+    --color-brand-800: #06562c;
+    --color-brand-900: #064725;
+    --color-brand-950: #022814;
 
-    --color-accent-100: #fdf1d3;
-    --color-accent-300: #f7cf6b;
-    --color-accent-400: #f2b632;
-    --color-accent-500: #e09b12;
-    --color-accent-600: #b9770c;
+    --color-accent-100: #fdf3d4;
+    --color-accent-300: #f5d56a;
+    --color-accent-400: #eebb2e;
+    --color-accent-500: #d4a017;
+    --color-accent-600: #b07d0c;
 
     --ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* Flat UI: surfaces use hairline borders, not drop shadows. Overlays
+       (menus, dialogs, toasts) keep shadow-lg / shadow-xl. */
+    --shadow-xs: 0 0 #0000;
+    --shadow-sm: 0 0 #0000;
+    --shadow-md: 0 0 #0000;
 }
 
 @layer base {
@@ -57,6 +62,76 @@
     font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Slim scrollbars: a thin rounded thumb, no arrow buttons, no track.
+ * Chromium/Safari use the ::-webkit-scrollbar parts (setting the standard
+ * scrollbar-* properties would switch Chrome back to native arrows), Firefox
+ * uses the standard properties. `scrollbar-dark` is the green-sidebar variant.
+ */
+@layer base {
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-button,
+    ::-webkit-scrollbar-corner,
+    ::-webkit-scrollbar-track {
+        display: none;
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border: 3px solid transparent;
+        border-radius: 9999px;
+        background-color: rgb(120 113 108 / 0.35);
+        background-clip: padding-box;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(87 83 78 / 0.6);
+    }
+
+    @supports not selector(::-webkit-scrollbar) {
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgb(120 113 108 / 0.35) transparent;
+        }
+    }
+}
+
+@utility scrollbar-dark {
+    &::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        border-width: 2px;
+        background-color: rgb(255 255 255 / 0.16);
+    }
+
+    &:hover::-webkit-scrollbar-thumb {
+        background-color: rgb(255 255 255 / 0.3);
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(255 255 255 / 0.45);
+    }
+
+    @supports not selector(::-webkit-scrollbar) {
+        scrollbar-width: thin;
+        scrollbar-color: rgb(255 255 255 / 0.2) transparent;
+    }
+}
+
+@utility scrollbar-none {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
 /* Bottom bar sits above the iOS/Android gesture area. */
 @utility pb-safe {
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
@@ -70,5 +145,17 @@
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
+    }
+}
+
+/*
+ * Grids get one shrinkable column by default. Without it a bare `grid`
+ * (e.g. `grid lg:grid-cols-[1fr_20rem]` on phones) sizes its implicit column
+ * to the content, so long names or selects push the page past 360px.
+ * Any grid-cols-* utility still wins: utilities come after base.
+ */
+@layer base {
+    .grid {
+        grid-template-columns: minmax(0, 1fr);
     }
 }

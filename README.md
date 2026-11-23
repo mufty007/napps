@@ -41,7 +41,7 @@ one suspended school.
 | 0800 000 0004 | Alhaji Bashir Lawan | Proprietor of Al-Ihsan Model Academy and Kano Capital International School (owing) + chapter executive, Kano (role switcher) |
 | 0800 000 0005 | Fatima Yusuf | Bursar, Al-Ihsan Model Academy |
 | 0800 000 0006 | Ibrahim Musa | Staff, Al-Ihsan Model Academy |
-| 0800 000 0007 | Aisha Garba | Parent |
+| 0800 000 0007 | Aisha Garba | Parent (enrolled by Kano Chapter — parents cannot self-register) |
 | 0800 000 0008 | Barr. Yusuf Lawal | Legal panel |
 | 0800 000 0009 | Kabiru Abdullahi | Community moderator, Kano Chapter |
 | 0800 000 0010 | Usman Dikko | State executive, Katsina (1 school to approve) |
@@ -50,15 +50,17 @@ one suspended school.
 | 0800 000 0013 | Halima Bello | Applicant, no role yet (Zango Bright Stars, awaiting Katsina State) |
 | 0800 000 0014 | Nasiru Ahmed | Proprietor, Daura Model International School |
 
+Public hubs: `/news`, `/events`, `/jobs`, `/join` (school registration by
+state → chapter). Chapter executives add parents under **Membership → Parents**.
+
 Payments run against a simulated checkout locally (`PAYMENTS_DRIVER=fake`):
 "Pay online" opens a test page where you choose the outcome. Issuing dues
 runs on the queue, so keep a worker running (`php artisan queue:work`) or set
 `QUEUE_CONNECTION=sync` while clicking around.
 
-Demo accounts also accept the password `password`. Executives, bursars and the
-secretariat must set up two-factor authentication before they reach their
-dashboard; set `TWO_FACTOR_ENFORCE=false` locally to skip that while clicking
-around (it is always enforced in production).
+Demo accounts also accept the password `password`. Locally `TWO_FACTOR_ENFORCE`
+defaults to `false` so executives and bursars can click through without setting
+up 2FA (always enforced in production).
 
 ## Quality checks
 

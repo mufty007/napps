@@ -12,6 +12,7 @@ final readonly class NavItem
      * @param  string  $icon  Lucide icon name (without prefix).
      * @param  string|null  $active  Route-name pattern that marks the item active (defaults to "{route}*").
      * @param  bool  $mobile  Eligible for the phone bottom bar.
+     * @param  string|null  $section  Sidebar section heading (untranslated); derived from the key when null.
      */
     public function __construct(
         public string $key,
@@ -23,7 +24,18 @@ final readonly class NavItem
         public ?string $active = null,
         public bool $mobile = true,
         public ?string $permission = null,
+        public ?string $section = null,
     ) {}
+
+    /**
+     * Route-name patterns that mark this item active ("a.*|b.*" allows several).
+     *
+     * @return list<string>
+     */
+    public function patterns(): array
+    {
+        return explode('|', $this->activePattern());
+    }
 
     public function activePattern(): string
     {

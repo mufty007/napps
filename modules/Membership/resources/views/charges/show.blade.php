@@ -55,7 +55,7 @@
             @if ($dues->isEmpty())
                 <x-ui.empty-state icon="school" :title="__('No schools here')" :description="__('Bills appear here within a minute of issuing.')" class="py-4" />
             @else
-                <x-ui.table>
+                <x-ui.table flush>
                     <x-slot:head>
                         <th scope="col">{{ __('School') }}</th>
                         <th scope="col" class="hidden sm:table-cell">{{ __('Chapter') }}</th>

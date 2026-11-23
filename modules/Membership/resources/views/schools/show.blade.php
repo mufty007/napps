@@ -25,7 +25,7 @@
                 @if ($dues->isEmpty())
                     <x-ui.empty-state icon="hand-coins" :title="__('No dues billed yet')" class="py-4" />
                 @else
-                    <x-ui.table>
+                    <x-ui.table flush>
                         <x-slot:head>
                             <th scope="col">{{ __('Charge') }}</th>
                             <th scope="col" class="text-right">{{ __('Amount') }}</th>

@@ -14,6 +14,7 @@ use App\Services\Sms\TermiiSmsGateway;
 use App\Support\Dashboard\DashboardWidgets;
 use App\Support\Navigation\Navigation;
 use App\Support\Navigation\NavItem;
+use App\Support\Notifications\NotificationPreferences;
 use App\Support\Scope\ActiveContext;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Database\Eloquent\Model;
@@ -44,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(DashboardWidgets::class);
+        $this->app->singleton(NotificationPreferences::class);
 
         $this->app->singleton(PaymentGateway::class, function ($app) {
             $driver = config('napps.payments.driver');
@@ -84,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
             $context = $this->app->make(ActiveContext::class);
             $view->with('context', $context);
             $view->with('navItems', $this->app->make(Navigation::class)->for($context->role(), $context));
+            $view->with('unreadNotifications', $context->user()?->unreadNotifications()->count() ?? 0);
         });
     }
 
@@ -106,11 +109,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->make(Navigation::class)->add(new NavItem(
             key: 'dashboard',
-            label: 'Home',
+            label: 'Dashboard',
             route: 'dashboard',
-            icon: 'house',
+            icon: 'layout-dashboard',
             roles: Role::cases(),
-            order: 0,
+            order: 5,
             active: 'dashboard',
         ));
     }

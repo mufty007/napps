@@ -51,6 +51,15 @@ it('always enforces 2FA in production even if the flag is off', function () {
     $this->get('/dashboard')->assertRedirect(route('account.show'));
 });
 
+it('skips 2FA for every role when enforcement is off outside production', function () {
+    config(['napps.two_factor.enforce' => false]);
+
+    $this->actingAsRole(Role::NationalExecutive, user: User::factory()->create());
+
+    $this->get('/dashboard')->assertOk();
+    $this->get(route('account.show'))->assertOk()->assertDontSee('Two-factor authentication required');
+});
+
 it('asks phone-only users to confirm by SMS code before enabling 2FA', function () {
     $user = User::factory()->phoneOnly()->create();
 

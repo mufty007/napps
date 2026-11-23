@@ -51,6 +51,23 @@ class ApplicationUpdate extends Notification
         return $mail;
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'title' => __('Application :ref: :status', ['ref' => $this->application->reference(), 'status' => $this->application->status->label()]),
+            'body' => $this->message(),
+            'url' => route('membership.apply.show', $this->application),
+            'icon' => match ($this->application->status) {
+                ApplicationStatus::Approved => 'award',
+                ApplicationStatus::Rejected => 'circle-x',
+                default => 'clipboard-check',
+            },
+        ];
+    }
+
     private function message(): string
     {
         $school = $this->application->school;

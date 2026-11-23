@@ -6,8 +6,8 @@
 @endphp
 
 <{{ $tag }} @if ($href) href="{{ $href }}" @endif {{ $attributes->class([
-    'group block rounded-2xl bg-white p-5 shadow-sm ring-1 ring-stone-200/80',
-    'transition-shadow hover:shadow-md hover:ring-stone-300' => $href,
+    'group block rounded-2xl bg-white p-5 ring-1 ring-stone-200',
+    'transition-colors hover:ring-brand-300' => $href,
 ]) }}>
     <div class="flex items-center justify-between gap-3">
         <p class="text-sm font-medium text-stone-500">{{ $label }}</p>

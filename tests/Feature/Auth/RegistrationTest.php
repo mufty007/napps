@@ -16,7 +16,7 @@ it('registers a new account after confirming the phone by SMS', function () {
 
     $code = $this->lastSmsCode('+2348123456789');
 
-    $this->post('/register/verify', ['code' => $code])->assertRedirect(route('dashboard'));
+    $this->post('/register/verify', ['code' => $code])->assertRedirect(route('start'));
 
     $user = User::query()->sole();
     expect($user->name)->toBe('Adaeze Obi')

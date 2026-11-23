@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RoleAssignment;
 use App\Support\Scope\ActiveContext;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ use Illuminate\Http\Request;
  */
 class ContextController extends Controller
 {
-    public function update(Request $request, ActiveContext $context): RedirectResponse
+    public function update(Request $request, ActiveContext $context): RedirectResponse|JsonResponse
     {
         $validated = $request->validate(['assignment' => ['required', 'integer']]);
 
@@ -27,6 +28,21 @@ class ContextController extends Controller
             ->event('switched')
             ->log('Switched active role');
 
-        return redirect()->route('dashboard')->with('status', __('You are now working as :role.', ['role' => $assignment->label()]));
+        $status = __('You are now working as :role.', ['role' => $assignment->label()]);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $redirect = $request->input('redirect');
+            if (! is_string($redirect) || ! str_starts_with($redirect, url('/'))) {
+                $redirect = route('start');
+            }
+
+            return response()->json([
+                'status' => $status,
+                'redirect' => $redirect,
+                'label' => $assignment->label(),
+            ]);
+        }
+
+        return redirect()->route('start')->with('status', $status);
     }
 }

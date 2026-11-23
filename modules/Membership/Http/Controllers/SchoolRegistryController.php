@@ -17,6 +17,7 @@ use DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Modules\Membership\Enums\PaymentMethod;
 use Modules\Membership\Http\Requests\RecordDuesPaymentRequest;
@@ -34,7 +35,7 @@ use Modules\Membership\Services\MembershipDocuments;
  */
 class SchoolRegistryController extends Controller
 {
-    public function index(Request $request, ActiveContext $context): View
+    public function index(Request $request, ActiveContext $context): View|Response
     {
         $level = $context->level();
         $status = MembershipStatus::tryFrom((string) $request->query('status'));
@@ -57,7 +58,7 @@ class SchoolRegistryController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        return view('membership::schools.index', [
+        $data = [
             'schools' => $schools,
             'status' => $status,
             'search' => $search,
@@ -67,7 +68,13 @@ class SchoolRegistryController extends Controller
                     ->when($request->integer('state'), fn ($q, $id) => $q->where('state_id', $id))
                     ->orderBy('name')->pluck('name', 'id')
                 : collect(),
-        ]);
+        ];
+
+        if ($request->ajax() || $request->header('X-Partial') === 'schools') {
+            return response()->view('membership::schools.partials.table', $data);
+        }
+
+        return view('membership::schools.index', $data);
     }
 
     public function show(School $school, MembershipDocuments $documents): View

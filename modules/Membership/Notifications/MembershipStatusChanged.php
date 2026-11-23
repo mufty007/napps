@@ -35,6 +35,19 @@ class MembershipStatusChanged extends Notification
             ->action(__('Open NAPPS'), route('membership.dues.index', ['school' => $this->school->getKey()]));
     }
 
+    /**
+     * @return array<string, string>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'title' => $this->suspended ? __('Membership suspended') : __('Membership reinstated'),
+            'body' => $this->message(),
+            'url' => route('membership.dues.index', ['school' => $this->school->getKey()]),
+            'icon' => $this->suspended ? 'shield-alert' : 'shield-check',
+        ];
+    }
+
     private function message(): string
     {
         return $this->suspended

@@ -65,8 +65,12 @@ final class PermissionMatrix
             'surveys.respond' => 'Answer surveys',
             'templates.publish' => 'Publish templates to the library',
             'templates.use' => 'Fill and export templates',
-            'announcements.send' => 'Send announcements and circulars',
-            'events.manage' => 'Run events, meetings and elections',
+            'announcements.send' => 'Send announcements, news and circulars',
+            'events.manage' => 'Run events, webinars, meetings and elections',
+            'jobs.manage' => 'Post and manage job board listings',
+            'elections.vote' => "Cast the school's one vote in association elections",
+            'directory.view' => 'Browse the member directory for own chapter or state',
+            'parents.manage' => 'Add parents to a chapter (parents cannot self-register)',
 
             // Community
             'community.access' => 'Use the members-only community',
@@ -81,9 +85,9 @@ final class PermissionMatrix
     public static function matrix(): array
     {
         $executive = [
-            'org.view', 'reports.view', 'surveys.issue', 'announcements.send', 'events.manage',
+            'org.view', 'reports.view', 'surveys.issue', 'announcements.send', 'events.manage', 'jobs.manage',
             'community.access', 'community.votes.run', 'templates.use', 'claims.escalated.view',
-            'membership.dues.configure',
+            'membership.dues.configure', 'directory.view',
         ];
 
         return [
@@ -98,7 +102,7 @@ final class PermissionMatrix
 
             Role::ChapterExecutive->value => [
                 ...$executive, 'membership.applications.verify', 'membership.dues.record', 'claims.mediate',
-                'leases.disputes.resolve',
+                'leases.disputes.resolve', 'parents.manage',
             ],
 
             Role::Proprietor->value => [
@@ -106,6 +110,7 @@ final class PermissionMatrix
                 'fees.structures.manage', 'fees.invoices.manage', 'fees.payments.record', 'fees.arrears.view',
                 'records.students.manage', 'records.staff.manage', 'records.transfers.manage', 'records.debtor-check',
                 'claims.open', 'leases.manage', 'surveys.respond', 'templates.use', 'community.access',
+                'elections.vote', 'directory.view',
             ],
 
             Role::Bursar->value => [

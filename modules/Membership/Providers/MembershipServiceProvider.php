@@ -73,6 +73,16 @@ class MembershipServiceProvider extends ModuleServiceProvider
                 order: 40,
                 active: 'membership.charges.*',
                 permission: 'membership.dues.configure',
+            ))
+            ->add(new NavItem(
+                key: 'membership.parents',
+                label: 'Parents',
+                route: 'membership.parents.index',
+                icon: 'users',
+                roles: [Role::ChapterExecutive],
+                order: 35,
+                active: 'membership.parents.*',
+                permission: 'parents.manage',
             ));
     }
 

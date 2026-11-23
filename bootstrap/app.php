@@ -24,7 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'two-factor.required',
         ]);
 
-        $middleware->redirectUsersTo(fn () => route('dashboard'));
+        $middleware->redirectUsersTo(fn () => route('start'));
+
+        // UI preference written by the browser (sidebar collapsed); not sensitive.
+        $middleware->encryptCookies(except: ['napps_sidebar']);
 
         // Gateway webhooks are authenticated by their HMAC signature instead.
         $middleware->preventRequestForgery(except: ['webhooks/*']);
